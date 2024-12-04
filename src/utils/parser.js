@@ -41,6 +41,22 @@ const parseLogEntry = (entry, format) => {
                     message: standardMatch.groups.message.trim(),
                 };
             }
+            
+             // Nginx log format
+             const nginxLogRegex = /(?<ip>\S+) - - \[(?<datetime>[^\]]+)] "(?<method>\S+) (?<endpoint>\S+) HTTP\/\d\.\d" (?<status>\d+) (?<size>\d+) "(?<referrer>[^"]*)" "(?<userAgent>[^"]*)"/;
+             const nginxMatch = nginxLogRegex.exec(entry);
+             if (nginxMatch) {
+                 return {
+                     ip: nginxMatch.groups.ip,
+                     timestamp: new Date(nginxMatch.groups.datetime.replace(':', ' ')).toISOString(),
+                     method: nginxMatch.groups.method,
+                     endpoint: nginxMatch.groups.endpoint,
+                     status: parseInt(nginxMatch.groups.status, 10),
+                     size: parseInt(nginxMatch.groups.size, 10),
+                     referrer: nginxMatch.groups.referrer,
+                     userAgent: nginxMatch.groups.userAgent,
+                 };
+             }
 
             // Fallback for plain text
             const [timestamp, logLevel, ...messageParts] = entry.split(' ');

@@ -1,0 +1,23 @@
+{"level":"info","message":"Processing entry: timestamp,logLevel,source,message\r","timestamp":"2024-12-03T19:45:39.122Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T19:45:39.133Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T10:30:00Z,INFO,AppService,Application started successfully.\r","timestamp":"2024-12-03T19:45:39.134Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T11:00:15Z,ERROR,AuthService,User authentication failed due to invalid credentials.\r","timestamp":"2024-12-03T19:45:39.292Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T12:45:30Z,DEBUG,Database,Query execution time: 120ms.\r","timestamp":"2024-12-03T19:45:39.338Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T13:15:45Z,WARN,CacheManager,Cache miss for key: user:12345\r","timestamp":"2024-12-03T19:45:39.374Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T14:30:10Z,INFO,NotificationService,Email sent to user@example.com\r","timestamp":"2024-12-03T19:45:39.403Z"}
+{"level":"info","message":"Processing entry: [object Object]","timestamp":"2024-12-03T19:45:39.434Z"}
+{"level":"info","message":"Processing entry: [object Object]","timestamp":"2024-12-03T19:45:39.459Z"}
+{"level":"info","message":"Processing entry: [object Object]","timestamp":"2024-12-03T19:45:39.484Z"}
+{"level":"info","message":"Processing entry: [object Object]","timestamp":"2024-12-03T19:45:39.518Z"}
+{"level":"info","message":"Processing entry: [object Object]","timestamp":"2024-12-03T19:45:39.552Z"}
+{"level":"info","message":"Processing entry: timestamp,logLevel,source,message\r","timestamp":"2024-12-03T19:52:28.811Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T19:52:28.824Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T10:30:00Z,INFO,AppService,Application started successfully.\r","timestamp":"2024-12-03T19:52:28.826Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T11:00:15Z,ERROR,AuthService,User authentication failed due to invalid credentials.\r","timestamp":"2024-12-03T19:52:28.971Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T12:45:30Z,DEBUG,Database,Query execution time: 120ms.\r","timestamp":"2024-12-03T19:52:29.023Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T13:15:45Z,WARN,CacheManager,Cache miss for key: user:12345\r","timestamp":"2024-12-03T19:52:29.054Z"}
+{"level":"info","message":"Processing entry: 2024-12-01T14:30:10Z,INFO,NotificationService,Email sent to user@example.com\r","timestamp":"2024-12-03T19:52:29.082Z"}
+{"level":"error","message":"search_phase_execution_exception\n\tRoot causes:\n\t\tquery_shard_exception: No mapping found for [timestamp:asc] in order to sort on","timestamp":"2024-12-03T19:55:02.235Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T20:16:52.863Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T20:20:03.852Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T20:44:31.477Z"}

@@ -1,0 +1,6 @@
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T19:45:39.133Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T19:52:28.824Z"}
+{"level":"error","message":"search_phase_execution_exception\n\tRoot causes:\n\t\tquery_shard_exception: No mapping found for [timestamp:asc] in order to sort on","timestamp":"2024-12-03T19:55:02.235Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T20:16:52.863Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T20:20:03.852Z"}
+{"level":"error","message":"Error parsing log entry: Unsupported format or invalid entry","timestamp":"2024-12-03T20:44:31.477Z"}

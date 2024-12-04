@@ -2,6 +2,10 @@ const Log = require('../models/log');
 const elasticClient = require('../config/elasticsearch');
 const { parseLogEntry } = require('../utils/parser');
 
+
+//Add batch size for ingestion optimization
+const BATCH_SIZE = 1000;
+
 const ingestLogs = async (req, res) => {
     try {
         if (!req.files || req.files.length === 0) {
@@ -38,26 +42,36 @@ const ingestLogs = async (req, res) => {
                 entries = fileContent.split('\n').filter((entry) => entry.trim());
             }
 
-            for (const entry of entries) {
-                console.log(`Processing entry: ${entry}`); // Log the entry being processed
+            for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+              const batch = entries.slice(i, i + BATCH_SIZE);
+              const parsedLogs = [];
 
-                const parsedLog = format === 'json' ? entry : parseLogEntry(entry, format);
-                if (!parsedLog) {
-                    console.error('Error parsing log entry: Unsupported format or invalid entry');
-                    continue;
-                }
+              
 
-                const log = new Log(parsedLog);
-                await log.save();
+              for (const entry of batch) {
+                  console.log(`Processing entry: ${entry}`);
+                  const parsedLog = format === 'json' ? entry : parseLogEntry(entry, format);
+                  if (!parsedLog) {
+                      console.error('Error parsing log entry: Unsupported format or invalid entry');
 
-                await elasticClient.index({
-                    index: 'logs',
-                    body: parsedLog,
-                });
-            }
+                      continue;
+                  }
+                  parsedLogs.push(parsedLog);
+              }
+
+              // Save batch to MongoDB
+              await Log.insertMany(parsedLogs);
+
+               
+
+              // Index batch to Elasticsearch
+              const body = parsedLogs.flatMap(doc => [{ index: { _index: 'logs' } }, doc]);
+              await elasticClient.bulk({ refresh: true, body });
+          }
         }
 
         res.status(200).json({ message: 'Logs ingested successfully' });
+        
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: 'Internal server error' });
@@ -70,7 +84,7 @@ const searchLogs = async (req, res) => {
     const { query, from, to, level, source } = req.query;
     const must = [];
     const filter = [];
-
+    
     if (query) must.push({ match: { message: query } });
     if (from || to) {
       filter.push({
@@ -98,5 +112,6 @@ const searchLogs = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 module.exports = { ingestLogs, searchLogs };
