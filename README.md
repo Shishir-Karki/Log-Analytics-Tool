@@ -313,12 +313,6 @@ http://localhost:5000/api/logs/search?query=error&from=2023-10-01T00:00:00Z&to=2
 - Input sanitization
 - Error message sanitization
 
-## **Deployment Requirements**
-### Hardware Requirements
-- CPU: 4+ cores
-- RAM: 8GB minimum
-- Storage: SSD recommended
-- Network: 1Gbps minimum
 
 ### Software Requirements
 - Node.js 16+
