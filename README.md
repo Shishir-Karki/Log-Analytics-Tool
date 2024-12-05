@@ -35,7 +35,7 @@ npm install
 ### **3. Set Up Environment Variables**
 Create a `.env` file in the project root and add:
 ```plaintext
-MONGO_URI=mongodb://localhost:27017/logs
+MONGO_URI=mongodb:Your_URL
 ELASTICSEARCH_URL=http://localhost:9200
 PORT=5000
 ```
