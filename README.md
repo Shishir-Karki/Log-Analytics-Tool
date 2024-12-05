@@ -52,10 +52,6 @@ npm run dev
 
 Ensure Elasticsearch is running on **port 9200**.  
 
-### **Start with Docker**  
-```bash
-docker pull elasticsearch:latest
-docker run -d -p 9200:9200 -e "discovery.type=single-node" elasticsearch:latest
 ```
 
 ### **Verify Elasticsearch**  
