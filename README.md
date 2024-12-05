@@ -23,8 +23,7 @@ A powerful and flexible log analytics system designed to handle multiple log for
 
 ### **1. Clone the Repository**
 ```bash
-git clone <repository-url>
-cd log-analytics-pipeline
+git clone https://github.com/Shishir-Karki/Log-Analytics-Tool.git
 ```
 
 ### **2. Install Dependencies**
