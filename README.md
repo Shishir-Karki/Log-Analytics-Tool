@@ -46,22 +46,112 @@ npm run dev
 ```
 
 ---
-
 ## **Setting Up Elasticsearch**
 
-Ensure Elasticsearch is running on **port 9200**.  
+### **1. Download and Installation**
 
-```
+1. Visit the official Elasticsearch website:   ```
+   https://www.elastic.co/downloads/elasticsearch   ```
 
-### **Verify Elasticsearch**  
-Test if Elasticsearch is running with:  
-```bash
-curl -X GET http://localhost:9200/
-```
+2. Download Elasticsearch 8.x.x for Windows (ZIP file)
+   - Choose the ZIP archive, not the MSI installer
+   - Example: `elasticsearch-8.16.2-windows-x86_64.zip`
 
-You should see a JSON response confirming it is operational.
+3. Extract the ZIP file to your desired location
+   - Recommended: `C:\elasticsearch`
+   - Full path example: `C:\elasticsearch\elasticsearch-8.16.2`
 
----
+### **2. Configuration**
+
+1. Navigate to the config directory:   ```
+   C:\elasticsearch\elasticsearch-8.16.2\config   ```
+
+2. Edit `elasticsearch.yml`:   ```yaml
+   # Disable security features for development
+   xpack.security.enabled: false
+
+   # Allow connections from any IP (development only)
+   network.host: 0.0.0.0
+
+   # Default port
+   http.port: 9200
+
+   # Cluster name
+   cluster.name: log-analytics-cluster
+
+   # Node name
+   node.name: node-1   ```
+
+### **3. Running Elasticsearch**
+
+1. Open Command Prompt as Administrator
+
+2. Navigate to the bin directory:   ```bash
+   cd C:\elasticsearch\elasticsearch-8.16.2\bin   ```
+
+3. Start Elasticsearch:   ```bash
+   elasticsearch.bat   ```
+
+4. Wait for startup (you should see something like):   ```
+   [2024-03-10T12:00:00,000][INFO ][o.e.n.Node               ] [node-1] started   ```
+
+### **4. Verify Installation**
+
+1. Open a new Command Prompt window
+
+2. Test the connection:   ```bash
+   curl http://localhost:9200   ```
+
+   Or visit in your browser:   ```
+   http://localhost:9200   ```
+
+3. Expected response:   ```json
+   {
+     "name" : "node-1",
+     "cluster_name" : "log-analytics-cluster",
+     "version" : {
+       "number" : "8.16.2"
+     },
+     "tagline" : "You Know, for Search"
+   }   ```
+
+### **5. Common Issues and Solutions**
+
+1. **Java Not Found**
+   - Error: `'java' is not recognized as an internal or external command`
+   - Solution: Install Java 17 or later and set JAVA_HOME
+
+2. **Port Already in Use**
+   - Error: `[ERROR][o.e.b.Bootstrap] [node-1] port 9200 already in use`
+   - Solution: Kill the process using port 9200:     ```bash
+     netstat -ano | findstr 9200
+     taskkill /F /PID <PID>     ```
+
+3. **Permission Issues**
+   - Error: `Access denied`
+   - Solution: Run Command Prompt as Administrator
+
+### **6. Development Tips**
+
+1. **Reset Elasticsearch Index**   ```bash
+   npm run reset-elastic   ```
+
+2. **Monitor Elasticsearch**
+   - View logs in real-time:     ```
+     C:\elasticsearch\elasticsearch-8.16.2\logs\log-analytics-cluster.log     ```
+
+3. **Stop Elasticsearch**
+   - Press `Ctrl + C` in the Command Prompt window
+   - Or close the Command Prompt window
+
+### **7. Production Considerations**
+
+> ⚠️ The above setup is for development. For production:
+- Enable security features
+- Configure proper authentication
+- Set up proper network settings
+- Configure cluster settings
+- Set up monitoring
 
 ## **API Endpoints**
 
