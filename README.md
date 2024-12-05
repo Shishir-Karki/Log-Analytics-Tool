@@ -1,146 +1,268 @@
-# Log Analytics Pipeline
+---
 
-## Setup Instructions
+# **Log Analytics Pipeline**
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd log-analytics-pipeline
-   ```
+A powerful and flexible log analytics system designed to handle multiple log formats, enabling efficient ingestion, processing, storage, and advanced searching.
 
-2. **Install dependencies:**
-   Make sure you have Node.js and npm installed. Then run:
-   ```bash
-   npm install
-   ```
+---
 
-3. **Set up environment variables:**
-   Create a `.env` file in the root directory and add the following variables:
-   ```plaintext
-   MONGO_URI=mongodb://localhost:27017/logs
-   ELASTICSEARCH_URL=http://localhost:9200
-   PORT=5000
-   ```
+## **Key Features**
+- 📂 **Multi-format Log Ingestion**: Supports JSON, CSV, Plain Text, and Nginx formats.
+- 🚀 **Batch Processing**: Optimized for high-performance data handling.
+- 🛠️ **Dual Storage System**: 
+  - **MongoDB**: Persistent storage.
+  - **Elasticsearch**: Fast, flexible search capabilities.
+- 🔍 **Advanced Search**: Filter, sort, and paginate logs with ease.
+- ⏱️ **Real-time Processing**: Instant updates and log analysis.
+- 🛡️ **Status-based Log Levels**: Assigns Nginx log levels dynamically.
+- ⚙️ **Flexible Schema**: Supports a variety of log attributes for diverse use cases.
 
-4. **Start the application:**
-   You can start the application in development mode using:
-   ```bash
-   npm run dev
-   ```
+---
 
-5. **Access the API:**
-   The API will be available at `http://localhost:5000/api/logs`.
+## **Getting Started**
 
-## API Documentation
+### **1. Clone the Repository**
+```bash
+git clone <repository-url>
+cd log-analytics-pipeline
+```
 
-### Ingest Logs
+### **2. Install Dependencies**
+Ensure Node.js and npm are installed, then run:
+```bash
+npm install
+```
 
-- **Endpoint:** `POST /api/logs/ingest`
-- **Description:** Ingests log files in JSON, CSV, or plain text format.
-- **Request:**
-  - **Form Data:**
-    - `files`: The log files to be uploaded (multiple files allowed).
-- **Response:**
-  - **200 OK:** Logs ingested successfully.
-  - **400 Bad Request:** If no files are uploaded or if the file format is unsupported.
-  - **500 Internal Server Error:** If there is an error during processing.
+### **3. Set Up Environment Variables**
+Create a `.env` file in the project root and add:
+```plaintext
+MONGO_URI=mongodb://localhost:27017/logs
+ELASTICSEARCH_URL=http://localhost:9200
+PORT=5000
+```
 
-### Search Logs
+### **4. Start the Application**
+```bash
+npm run dev
+```
 
-- **Endpoint:** `GET /api/logs/search`
-- **Description:** Searches for logs based on query parameters.
-- **Query Parameters:**
-  - `query`: Search term to match in log messages (supports fuzzy matching).
-  - `from`: Start date for the search range (ISO format).
-  - `to`: End date for the search range (ISO format).
-  - `level`: Log level to filter (e.g., INFO, ERROR).
-  - `source`: Source of the logs to filter.
-  - `sortField`: Field to sort by (default is `timestamp`).
-  - `sortOrder`: Order of sorting (`asc` or `desc`).
-  - `page`: Page number for pagination (default is 1).
-  - `pageSize`: Number of results per page (default is 10).
-- **Response:**
-  - **200 OK:** Returns an array of matching log entries with pagination and highlighting.
-  - **500 Internal Server Error:** If there is an error during the search.
+---
 
-## System Design Explanation
+## **Setting Up Elasticsearch**
 
-The Log Analytics Pipeline is designed to efficiently ingest, process, and search logs from various sources. The system is built using Node.js, Express, and MongoDB for data storage, with Elasticsearch for powerful search capabilities.
+Ensure Elasticsearch is running on **port 9200**.  
 
-### Components:
+### **Start with Docker**  
+```bash
+docker pull elasticsearch:latest
+docker run -d -p 9200:9200 -e "discovery.type=single-node" elasticsearch:latest
+```
 
-- **Express.js:** Handles HTTP requests and routes.
-- **Multer:** Middleware for handling file uploads.
-- **Mongoose:** ODM for MongoDB to define schemas and interact with the database.
-- **Elasticsearch:** Used for indexing and searching log entries.
+### **Verify Elasticsearch**  
+Test if Elasticsearch is running with:  
+```bash
+curl -X GET http://localhost:9200/
+```
 
-### Workflow:
+You should see a JSON response confirming it is operational.
 
-1. **File Upload:** Users upload log files via the `/ingest` endpoint.
-2. **Processing:** The application processes the files based on their format (JSON, CSV, or plain text) and saves the entries to MongoDB and Elasticsearch.
-3. **Searching:** Users can search for logs using various filters via the `/search` endpoint.
+---
 
+## **API Endpoints**
 
-## Parsing Assumptions
+### **Log Ingestion**
+- **URL**: `POST /api/logs/ingest`
+- **Description**: Upload log files in multiple formats.
+- **Supported Formats**: JSON, CSV, Plain Text, Nginx.
+- **Request**: Form-data with `files` (supports multiple files).
+- **Response Codes**:
+  - `200`: Logs ingested successfully.
+  - `400`: Invalid format or no files provided.
+  - `500`: Internal processing error.
 
-- **JSON Format:** Assumes the file contains an array of JSON objects, each representing a log entry with fields like `timestamp`, `logLevel`, `message`, and `source`.
-- **CSV Format:** Assumes the first line contains headers matching the fields `timestamp`, `logLevel`, `source`, and `message`. Each subsequent line represents a log entry.
-- **Plain Text Format:** Assumes each line is a log entry with a format like `timestamp [logLevel] source - message`. The parser splits the line by spaces and uses the first two parts as `timestamp` and `logLevel`, with the rest as the `message`.
-- **Nginx Log Format:** Uses a regex pattern to extract fields such as `ip`, `datetime`, `method`, `endpoint`, `status`, `size`, `referrer`, and `userAgent`.
+### **Log Search**
+- **URL**: `GET /api/logs/search`
+- **Description**: Search logs with advanced filters.
+- **Query Parameters**:
+  - `query`: Search term.
+  - `from`: Start date (ISO format).
+  - `to`: End date (ISO format).
+  - `level`: Log level (e.g., INFO, WARN, ERROR).
+  - `source`: Source filter.
+  - `sortField`: Field to sort by (e.g., timestamp).
+  - `sortOrder`: `asc` or `desc`.
+  - `page`: Page number.
+  - `pageSize`: Results per page.
 
-## Sample Log Formats Supported
+---
 
-### JSON Format
+## **Supported Log Formats**
 
-
-json
+### **1. JSON**
+```json
 [
-{
-"timestamp": "2023-10-01T12:00:00Z",
-"logLevel": "INFO",
-"message": "User logged in",
-"source": "auth-service"
-},
-{
-"timestamp": "2023-10-01T12:05:00Z",
-"logLevel": "ERROR",
-"message": "Failed to connect to database",
-"source": "db-service"
-}
+  {
+    "timestamp": "2023-10-01T12:00:00Z",
+    "logLevel": "INFO",
+    "message": "User logged in",
+    "source": "auth-service"
+  }
 ]
+```
 
-    
-### CSV Format
-
+### **2. CSV**
+```csv
 timestamp,logLevel,source,message
 2023-10-01T12:00:00Z,INFO,auth-service,User logged in
-2023-10-01T12:05:00Z,ERROR,db-service,Failed to connect to database
+```
 
-
-### Plain Text Format
-
+### **3. Plain Text**
+```plaintext
 2023-10-01T12:00:00Z INFO auth-service User logged in
-2023-10-01T12:05:00Z ERROR db-service Failed to connect to database
+```
 
-### Nginx Format
+### **4. Nginx**
+```plaintext
+127.0.0.1 - - [10/Apr/2024:16:00:39 +0000] "GET /api/logs/search HTTP/1.1" 404 151 "-" "Mozilla/5.0"
+```
 
-127.0.0.1 - - [10/Apr/2024:16:00:39 +0000] "GET /api/logs/search?query=Failed HTTP/1.1" 404 151 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+---
+
+Here's a consistent and professional revision of your system design section:
+
+---
+
+## **System Design**
+
+The log analytics pipeline is designed to efficiently handle the ingestion, processing, storage, and searching of logs across multiple formats. Below is an overview of its key components and data flow:
+
+---
+
+### **Components**
+
+#### **1. Express Server**  
+- Acts as the main entry point for API requests.  
+- Handles routes for log ingestion (`/api/logs/ingest`) and search (`/api/logs/search`).  
+
+#### **2. Log Ingestion**  
+- Supports multiple log formats: **JSON**, **CSV**, **Plain Text**, and **Nginx**.  
+- Utilizes **Multer** to manage file uploads.  
+- Processes logs in batches for optimal performance.  
+
+#### **3. Data Storage**  
+- **MongoDB**: Persistent storage of raw log data.  
+- **Elasticsearch**: Indexes logs for fast and flexible search capabilities.  
+
+#### **4. Log Parsing**  
+- Converts raw log entries into structured data.  
+- Applies specific parsing rules for each supported log format.  
+
+#### **5. Search Functionality**  
+- Provides advanced filtering, sorting, and pagination options.  
+- Integrates with Elasticsearch for efficient querying and result retrieval.  
+
+---
+
+### **Data Flow**
+
+1. **Ingestion**:  
+   - Logs are uploaded via the `/api/logs/ingest` endpoint.  
+   - The server processes logs in batches, parsing and preparing them for storage.  
+
+2. **Storage**:  
+   - Logs are saved in **MongoDB** for persistence.  
+   - Simultaneously, logs are indexed in **Elasticsearch** for fast querying.  
+
+3. **Search**:  
+   - Users query logs through the `/api/logs/search` endpoint.  
+   - Elasticsearch retrieves results based on user-defined filters, sorting, and pagination criteria.  
+
+---
+
+### **Key Advantages**
+
+- **Scalability**: Handles large volumes of logs efficiently.  
+- **Flexibility**: Supports multiple log formats and customizable search queries.  
+- **Performance**: Combines batch processing, structured parsing, and Elasticsearch for quick data retrieval.  
+
+This robust design ensures the system remains efficient and reliable, even with high log ingestion rates and complex search requirements.  
+
+--- 
 
 
 
-## Future Improvements
+## **Parsing Rules**
 
-- **Enhanced Security:** Implement authentication and authorization for API endpoints.
-- **Scalability:** Use containerization and orchestration tools like Docker and Kubernetes for scaling.
-- **Advanced Analytics:** Integrate machine learning models for predictive analytics on log data.
-- **User Interface:** Develop a web-based dashboard for visualizing log data and analytics.
+### **JSON**
+- Must be an array of objects.
+- Required fields: `timestamp`, `logLevel`, `message`, `source`.
+- Timestamp must follow ISO format.
 
-## Testing URLs
+### **CSV**
+- First row should contain headers.
+- Required columns: `timestamp`, `logLevel`, `source`, `message`.
+- Values should be comma-separated.
+- Timestamp must follow ISO format.
 
-- **Ingest Logs:**
-  - `POST http://localhost:5000/api/logs/ingest` with form data containing log files.
+### **Plain Text**
+- Space-separated values: `timestamp logLevel source message`.
+- Timestamp must follow ISO format.
 
-- **Search Logs:**
-  - `GET http://localhost:5000/api/logs/search?query=error&from=2023-10-01T00:00:00Z&to=2023-10-02T00:00:00Z&level=ERROR&source=db-service&sortField=timestamp&sortOrder=desc&page=1&pageSize=10`
+### **Nginx**
+- Uses the standard Nginx log format.
+- Log levels are auto-assigned based on HTTP status codes:
+  - `2xx/3xx`: INFO
+  - `4xx`: WARN
+  - `5xx`: ERROR
 
-This `README.md` provides a comprehensive overview of this application, including setup instructions, API documentation, system design, supported log formats, and future improvements. Adjust the repository URL and any other specific details as needed for your project.
+---
+
+## **Example Commands**
+
+### **Ingest Logs**
+#### JSON
+```bash
+curl -X POST http://localhost:5000/api/logs/ingest -F "files=@logs.json"
+```
+
+#### CSV
+```bash
+curl -X POST http://localhost:5000/api/logs/ingest -F "files=@logs.csv"
+```
+
+#### Plain Text
+```bash
+curl -X POST http://localhost:5000/api/logs/ingest -F "files=@logs.txt"
+```
+
+#### Nginx
+```bash
+curl -X POST http://localhost:5000/api/logs/ingest -F "files=@nginx.log"
+```
+
+---
+
+### **Search Logs**
+#### Basic Search
+```bash
+http://localhost:5000/api/logs/search?query=error
+```
+
+#### Advanced Search
+```bash
+http://localhost:5000/api/logs/search?query=error&from=2023-10-01T00:00:00Z&to=2023-10-02T00:00:00Z&level=ERROR&source=db-service&sortField=timestamp&sortOrder=desc&page=1&pageSize=10
+```
+
+---
+
+## **Future Improvements**
+- 🔐 Authentication and Authorization.
+- 📊 Advanced Analytics Dashboard.
+- 🤖 Machine Learning for predictive log analysis.
+- ⚡ Real-time Log Streaming.
+- ⏳ Rate Limiting and Quota Management.
+- 🔄 Export Logs in multiple formats.
+- 🌐 Support for Custom Log Formats.
+
+---
+

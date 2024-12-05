@@ -1,15 +1,16 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
-const connectDB = require('./config/database');
-const logRoutes = require('./routes/logs');
+const express = require('express'); // Express for creating the server
+const bodyParser = require('body-parser'); // Middleware for parsing request bodies
+const dotenv = require('dotenv'); // Load environment variables
+const connectDB = require('./config/database'); // MongoDB connection
+const logRoutes = require('./routes/logs'); // Log routes
 
-dotenv.config();
-connectDB();
+dotenv.config(); // Load .env variables
+connectDB(); // Connect to MongoDB
 
-const app = express();
+const app = express(); // Initialize Express app
 
-app.use(bodyParser.json());
-app.use('/api/logs', logRoutes);
+app.use(bodyParser.json()); // Parse JSON request bodies
 
-module.exports = app;
+app.use('/api/logs', logRoutes); // Mount log routes at `/api/logs`
+
+module.exports = app; // Export app for server or testing
