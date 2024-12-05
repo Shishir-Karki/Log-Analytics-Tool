@@ -124,10 +124,6 @@ timestamp,logLevel,source,message
 
 ---
 
-Here's a consistent and professional revision of your system design section:
-
----
-
 ## **System Design**
 
 The log analytics pipeline is designed to efficiently handle the ingestion, processing, storage, and searching of logs across multiple formats. Below is an overview of its key components and data flow:
