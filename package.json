@@ -5,12 +5,14 @@
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
-        "dev": "nodemon server.js"
+        "dev": "nodemon server.js",
+        "reset-elastic": "node src/scripts/resetElasticsearch.js"
+
     },
     "author": "Your Name",
     "license": "MIT",
     "dependencies": {
-        "@elastic/elasticsearch": "^8.11.0",
+        "@elastic/elasticsearch": "^8.16.2",
         "body-parser": "^1.20.2",
         "bull": "^4.16.4",
         "csv-parser": "^3.0.0",

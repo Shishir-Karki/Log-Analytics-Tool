@@ -1,4 +1,6 @@
 const Log = require('../models/log'); // MongoDB log model
+const ErrorLog = require('../models/errorLog');
+
 const elasticClient = require('../config/elasticsearch'); // Elasticsearch client
 const { parseLogEntry } = require('../utils/parser'); // Log entry parser utility
 
@@ -21,56 +23,103 @@ const ingestLogs = async (req, res) => {
       return handleError(res, new Error('No files uploaded'), 400);
     }
 
+    const results = {
+      successful: 0,
+      failed: 0,
+      errors: []
+    };
+
     for (const file of req.files) {
-      const format =
-        file.mimetype === 'application/json' ? 'json' :
-        file.mimetype === 'text/csv' ? 'csv' :
-        file.mimetype === 'text/plain' ? 'text' : null;
+      const format = file.mimetype === 'application/json' ? 'json' :
+                    file.mimetype === 'text/csv' ? 'csv' :
+                    file.mimetype === 'text/plain' ? 'text' : null;
 
       if (!format) {
-        return handleError(res, new Error(`Unsupported file format: ${file.mimetype}`), 400);
+        const error = `Unsupported file format: ${file.mimetype}`;
+        await ErrorLog.create({
+          rawEntry: file.originalname,
+          format: file.mimetype,
+          error,
+          fileName: file.originalname
+        });
+        results.failed++;
+        results.errors.push({ fileName: file.originalname, error });
+        continue;
       }
 
       const fileContent = file.buffer.toString('utf-8');
       let entries;
 
       try {
-        if (format === 'json') {
-          entries = JSON.parse(fileContent);
-          if (!Array.isArray(entries)) throw new Error('Expected an array of log entries.');
-        } else {
-          entries = fileContent.split('\n').filter((entry) => entry.trim());
+        entries = format === 'json' ? 
+          JSON.parse(fileContent) : 
+          fileContent.split('\n').filter(entry => entry.trim());
+          
+        if (format === 'json' && !Array.isArray(entries)) {
+          throw new Error('Expected an array of log entries');
         }
       } catch (error) {
-        return handleError(res, new Error('Failed to parse file'), 400, error.message);
+        const errorMessage = `Failed to parse file: ${error.message}`;
+        await ErrorLog.create({
+          rawEntry: fileContent,
+          format,
+          error: errorMessage,
+          fileName: file.originalname
+        });
+        results.failed++;
+        results.errors.push({ fileName: file.originalname, error: errorMessage });
+        continue;
       }
+
+    
+
+  
 
       for (let i = 0; i < entries.length; i += BATCH_SIZE) {
         const batch = entries.slice(i, i + BATCH_SIZE);
         const parsedLogs = [];
-
+        
         for (const entry of batch) {
           try {
             const parsedLog = format === 'json' ? entry : parseLogEntry(entry, format);
-            if (parsedLog) parsedLogs.push(parsedLog);
+            if (parsedLog) {
+              parsedLogs.push(parsedLog);
+              results.successful++;
+            }
           } catch (error) {
-            console.warn('Skipped unparseable entry:', entry);
+            results.failed++;
+            await ErrorLog.create({
+              rawEntry: error.rawEntry || entry,
+              format,
+              error: error.message,
+              fileName: file.originalname
+            });
           }
         }
 
-        try {
-          if (parsedLogs.length > 0) {
-            await Log.insertMany(parsedLogs); // Save to MongoDB
-            const body = parsedLogs.flatMap((doc) => [{ index: { _index: 'logs' } }, doc]);
-            await elasticClient.bulk({ refresh: true, body }); // Index in Elasticsearch
+        if (parsedLogs.length > 0) {
+          try {
+            await Log.insertMany(parsedLogs);
+            const body = parsedLogs.flatMap(doc => [
+              { index: { _index: 'logs' } },
+              doc
+            ]);
+            await elasticClient.bulk({ refresh: true, body });
+          } catch (error) {
+            results.errors.push({
+              fileName: file.originalname,
+              error: `Batch save error: ${error.message}`
+            });
           }
-        } catch (error) {
-          console.error('Error saving logs:', error.message);
         }
       }
     }
 
-    res.status(200).json({ status: 'success', message: 'Logs ingested successfully' });
+    res.status(200).json({
+      status: 'success',
+      message: 'Log ingestion completed',
+      results
+    });
   } catch (error) {
     handleError(res, error);
   }

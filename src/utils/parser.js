@@ -1,5 +1,19 @@
-const moment = require('moment'); // Library for date parsing and formatting
+const moment = require('moment');
 
+const validateLogEntry = (parsedLog, format) => {
+  const requiredFields = ['timestamp', 'logLevel', 'message', 'source'];
+  const missingFields = requiredFields.filter(field => !parsedLog[field]);
+  
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  }
+  
+  if (!moment(parsedLog.timestamp).isValid()) {
+    throw new Error('Invalid timestamp format');
+  }
+  
+  return parsedLog;
+};
 const parseLogEntry = (entry, format) => {
     try {
         // Handle JSON log format
@@ -48,6 +62,31 @@ const parseLogEntry = (entry, format) => {
             };
         }
 
+         // Handle Apache log format
+         const apacheLogRegex = /(?<ip>\S+) - - \[(?<datetime>[^\]]+)] "(?<method>\S+) (?<endpoint>[^\s?]+)(?:\?[^\s"]*)? HTTP\/\d\.\d" (?<status>\d+) (?<size>\d+) "(?<referrer>[^"]*)" "(?<userAgent>[^"]*)"/;
+         const apacheMatch = apacheLogRegex.exec(entry);
+ 
+         if (apacheMatch) {
+             const status = parseInt(apacheMatch.groups.status, 10);
+             let logLevel = 'INFO'; // Default log level
+             if (status >= 400 && status < 500) logLevel = 'WARN';
+             if (status >= 500) logLevel = 'ERROR';
+ 
+             return {
+                 timestamp: moment(apacheMatch.groups.datetime, 'DD/MMM/YYYY:HH:mm:ss Z').toISOString(),
+                 logLevel: logLevel,
+                 message: `${apacheMatch.groups.method} ${apacheMatch.groups.endpoint} ${apacheMatch.groups.status}`,
+                 source: 'apache',
+                 ip: apacheMatch.groups.ip,
+                 method: apacheMatch.groups.method,
+                 endpoint: apacheMatch.groups.endpoint,
+                 status: status,
+                 size: parseInt(apacheMatch.groups.size, 10),
+                 referrer: apacheMatch.groups.referrer,
+                 userAgent: apacheMatch.groups.userAgent,
+             };
+         }
+
         // Handle plain text log format
         if (format === 'text') {
             const [timestamp, logLevel, ...messageParts] = entry.split(' ');
@@ -61,11 +100,14 @@ const parseLogEntry = (entry, format) => {
             }
         }
 
-        return null; // Unsupported or invalid log format
-    } catch (error) {
-        console.error('Error parsing log entry:', error.message);
-        return null;
-    }
-};
-
+        if (parsedLog) {
+            return validateLogEntry(parsedLog, format);
+          }
+          
+          throw new Error('Unsupported or invalid log format');
+        } catch (error) {
+          error.rawEntry = entry;
+          throw error;
+        }
+      };
 module.exports = { parseLogEntry }; // Export the log parser function
