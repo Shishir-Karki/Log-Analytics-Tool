@@ -131,16 +131,8 @@ npm run dev
    - Error: `Access denied`
    - Solution: Run Command Prompt as Administrator
 
-### **6. Development Tips**
 
-1. **Reset Elasticsearch Index**   ```bash
-   npm run reset-elastic   ```
-
-2. **Monitor Elasticsearch**
-   - View logs in real-time:     ```
-     C:\elasticsearch\elasticsearch-8.16.2\logs\log-analytics-cluster.log     ```
-
-3. **Stop Elasticsearch**
+ **Stop Elasticsearch**
    - Press `Ctrl + C` in the Command Prompt window
    - Or close the Command Prompt window
 
