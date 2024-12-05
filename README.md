@@ -308,42 +308,11 @@ http://localhost:5000/api/logs/search?query=error&from=2023-10-01T00:00:00Z&to=2
   - Stack trace
   - Context information
 
-### **5. API Rate Limiting**
-- **Configuration**:
-  - Rate: 100 requests per minute
-  - Burst: 200 requests
-  - Window: 60 seconds
-- **Implementation**:
-  - Redis-based rate limiting
-  - Token bucket algorithm
-  - Per-IP tracking
 
-### **6. Monitoring & Metrics**
-#### Key Metrics
-- Ingestion rate (logs/second)
-- Parse success rate
-- Query response time
-- Storage utilization
-- Error rate by type
-
-#### Health Checks
-- MongoDB connection status
-- Elasticsearch cluster health
-- Disk space monitoring
-- Memory usage tracking
-
-## **Performance Benchmarks**
-- Log ingestion: 10,000 logs/second
-- Search latency: < 200ms (p95)
-- Storage efficiency: ~1KB per log entry
-- Index refresh: 1 second
 
 ## **Security Considerations**
 - Input sanitization
-- Rate limiting
 - Error message sanitization
-- Access control (planned)
-- Data encryption at rest
 
 ## **Deployment Requirements**
 ### Hardware Requirements
@@ -356,8 +325,6 @@ http://localhost:5000/api/logs/search?query=error&from=2023-10-01T00:00:00Z&to=2
 - Node.js 16+
 - MongoDB 4.4+
 - Elasticsearch 8.16+
-- Redis 6+ (for rate limiting)
-
 ----
 
 ## **Future Improvements**
