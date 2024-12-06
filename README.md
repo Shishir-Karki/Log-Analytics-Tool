@@ -16,6 +16,8 @@ A powerful and flexible log analytics system designed to handle multiple log for
 - ⏱️ **Real-time Processing**: Instant updates and log analysis.
 - 🛡️ **Status-based Log Levels**: Assigns Nginx log levels dynamically.
 - ⚙️ **Flexible Schema**: Supports a variety of log attributes for diverse use cases.
+- 🛠️ **Error Logging**: Stores errors encountered during log ingestion or processing in MongoDB for review.
+
 
 ---
 
@@ -136,14 +138,6 @@ npm run dev
    - Press `Ctrl + C` in the Command Prompt window
    - Or close the Command Prompt window
 
-### **7. Production Considerations**
-
-> ⚠️ The above setup is for development. For production:
-- Enable security features
-- Configure proper authentication
-- Set up proper network settings
-- Configure cluster settings
-- Set up monitoring
 
 ## **API Endpoints**
 
@@ -205,9 +199,11 @@ timestamp,logLevel,source,message
 
 ---
 
+
+
 ## **System Design**
 
-The log analytics pipeline is designed to efficiently handle the ingestion, processing, storage, and searching of logs across multiple formats. Below is an overview of its key components and data flow:
+The log analytics pipeline is designed to efficiently handle the ingestion, processing, storage, and searching of logs across multiple formats, with comprehensive error tracking. Below is an overview of its key components and data flow:
 
 ---
 
@@ -223,14 +219,25 @@ The log analytics pipeline is designed to efficiently handle the ingestion, proc
 - Processes logs in batches for optimal performance.  
 
 #### **3. Data Storage**  
-- **MongoDB**: Persistent storage of raw log data.  
+- **MongoDB**: 
+  - Persistent storage of raw log data
+  - Dedicated error log collection for tracking failures
 - **Elasticsearch**: Indexes logs for fast and flexible search capabilities.  
 
-#### **4. Log Parsing**  
-- Converts raw log entries into structured data.  
-- Applies specific parsing rules for each supported log format.  
+#### **4. Error Logging**
+- **Error Collection**: Stores detailed error information in MongoDB
+- **Error Types Tracked**:
+  - File format validation errors
+  - Parsing failures
+  - Storage operation failures
+- **Error Context**: Captures file names, raw entries, and stack traces
 
-#### **5. Search Functionality**  
+#### **5. Log Parsing**  
+- Converts raw log entries into structured data.  
+- Applies specific parsing rules for each supported format.
+- Records parsing failures in error log collection.
+
+#### **6. Search Functionality**  
 - Provides advanced filtering, sorting, and pagination options.  
 - Integrates with Elasticsearch for efficient querying and result retrieval.  
 
@@ -238,51 +245,82 @@ The log analytics pipeline is designed to efficiently handle the ingestion, proc
 
 ### **Data Flow**
 
-1. **Ingestion**:  
-   - Logs are uploaded via the `/api/logs/ingest` endpoint.  
-   - The server processes logs in batches, parsing and preparing them for storage.  
+1. **Ingestion & Validation**:  
+   - Logs are uploaded via the `/api/logs/ingest` endpoint.
+   - File format validation occurs before processing.
+   - Invalid formats are logged to error collection.
 
-2. **Storage**:  
-   - Logs are saved in **MongoDB** for persistence.  
-   - Simultaneously, logs are indexed in **Elasticsearch** for fast querying.  
+2. **Processing & Error Tracking**:
+   - Logs are processed in batches of 1000 entries.
+   - Parse errors are captured and stored in MongoDB.
+   - Successfully parsed logs continue to storage.
 
-3. **Search**:  
-   - Users query logs through the `/api/logs/search` endpoint.  
-   - Elasticsearch retrieves results based on user-defined filters, sorting, and pagination criteria.  
+3. **Storage**:  
+   - Valid logs are saved in MongoDB.
+   - Logs are indexed in Elasticsearch.
+   - Storage failures are logged to error collection.
+
+4. **Search**:  
+   - Users query logs through the `/api/logs/search` endpoint.
+   - Elasticsearch handles search operations.
+   - Search errors are tracked and logged.
 
 ---
 
-### **Key Advantages**
-
-- **Scalability**: Handles large volumes of logs efficiently.  
-- **Flexibility**: Supports multiple log formats and customizable search queries.  
-- **Performance**: Combines batch processing, structured parsing, and Elasticsearch for quick data retrieval.  
-
-This robust design ensures the system remains efficient and reliable, even with high log ingestion rates and complex search requirements.  
-
---- 
 
 
+## **Processing Pipeline**
 
-### **2. Processing Pipeline**
-#### Log Ingestion Flow
-1. **File Upload**:
-   - Multer middleware handles multipart/form-data
-   - In-memory storage for processing
-   - File type validation
+### **1. Log Ingestion Flow**
 
-2. **Batch Processing**:
-   - Batch size: 1000 logs
-   - Parallel processing using Promise.all()
-   - Error handling per batch
-   - Reference implementation:
+#### File Upload & Validation
+- **Multer Integration**: Handles multipart/form-data file uploads
+- **Format Validation**: Supports JSON, CSV, Plain Text, Nginx, Apache
+- **Error Logging**: Captures validation failures in MongoDB error collection
 
+#### Batch Processing
+- **Batch Size**: 1000 logs per batch
+- **Storage Flow**:
+  1. Parse log entries
+  2. Save to MongoDB
+  3. Index in Elasticsearch
+- **Error Handling**: Per-batch error tracking and storage
 
-3. **Format-Specific Parsing**:
-   - JSON: Direct parsing with schema validation
-   - CSV: Header validation and row parsing
-   - Plain Text: Regex-based parsing
-   - Nginx: Custom parser with status code mapping
+### **2. Format-Specific Parsing**
+
+#### JSON Logs
+- Array of objects validation
+- Schema conformity check
+- Required fields: timestamp, logLevel, message, source
+
+#### CSV Logs
+- Header validation
+- Column mapping
+- Required columns: timestamp, logLevel, source, message
+
+#### Plain Text
+- Space-separated format
+- Timestamp validation
+- Message concatenation
+
+#### Nginx/Apache Logs
+- Regex-based parsing
+- Status code to log level mapping:
+  - 2xx/3xx → INFO
+  - 4xx → WARN
+  - 5xx → ERROR
+- IP and user agent extraction
+
+### **3. Error Handling**
+
+#### Error Collection
+- **MongoDB Storage**: Dedicated error log collection
+- **Context Capture**: 
+  - Raw log entry
+  - Error type
+  - Stack trace
+  - Timestamp
+- **Retrieval**: Paginated error log access
 
 ### **3. Search Implementation**
 #### Query Building
@@ -291,6 +329,12 @@ This robust design ensures the system remains efficient and reliable, even with 
   - Range queries for timestamps
   - Fuzzy matching for messages
   - Reference implementation:
+
+### **4. Response Formats**
+Add standardized response formats for:
+- Successful ingestion
+- Search results with highlighting
+- Error responses with context
 
 
 ## **Parsing Rules**
@@ -355,6 +399,17 @@ http://localhost:5000/api/logs/search?query=error
 http://localhost:5000/api/logs/search?query=error&from=2023-10-01T00:00:00Z&to=2023-10-02T00:00:00Z&level=ERROR&source=db-service&sortField=timestamp&sortOrder=desc&page=1&pageSize=10
 ```
 
+---
+
+### **Basic error logs request**
+```bash
+curl http://localhost:5000/api/logs/errors
+```
+
+### **With pagination**
+```bash
+curl http://localhost:5000/api/logs/errors?page=2&pageSize=20
+```
 ---
 
 #### Performance Optimizations
