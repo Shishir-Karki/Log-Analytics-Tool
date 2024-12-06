@@ -137,6 +137,18 @@ npm run dev
   - `page`: Page number.
   - `pageSize`: Results per page.
 
+  
+### **Error Logs**
+- **URL**: `GET /api/logs/errors`
+- **Description**: Retrieve error logs with pagination
+- **Query Parameters**:
+  - `page`: Page number (default: 1)
+  - `pageSize`: Results per page (default: 10)
+- **Response Codes**:
+  - `200`: Error logs retrieved successfully
+  - `500`: Internal server error
+
+
 ---
 
 ## **Supported Log Formats**
