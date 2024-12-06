@@ -1,6 +1,6 @@
----
 
-## **Log Analytics Pipeline
+
+## Log Analytics Pipeline
 
 A powerful and flexible log analytics system designed to handle multiple log formats, enabling efficient ingestion, processing, storage, and advanced searching.
 
@@ -69,20 +69,12 @@ npm run dev
    C:\elasticsearch\elasticsearch-8.16.2\config   ```
 
 2. Edit `elasticsearch.yml`:   ```yaml
-   # Disable security features for development
+
    xpack.security.enabled: false
-
-   # Allow connections from any IP (development only)
    network.host: 0.0.0.0
-
-   # Default port
    http.port: 9200
-
-   # Cluster name
-   cluster.name: log-analytics-cluster
-
-   # Node name
-   node.name: node-1   ```
+   cluster.name: <name>
+   node.name: <your_choice>  ```
 
 ### **3. Running Elasticsearch**
 
@@ -117,26 +109,6 @@ npm run dev
      "tagline" : "You Know, for Search"
    }   ```
 
-### **5. Common Issues and Solutions**
-
-1. **Java Not Found**
-   - Error: `'java' is not recognized as an internal or external command`
-   - Solution: Install Java 17 or later and set JAVA_HOME
-
-2. **Port Already in Use**
-   - Error: `[ERROR][o.e.b.Bootstrap] [node-1] port 9200 already in use`
-   - Solution: Kill the process using port 9200:     ```bash
-     netstat -ano | findstr 9200
-     taskkill /F /PID <PID>     ```
-
-3. **Permission Issues**
-   - Error: `Access denied`
-   - Solution: Run Command Prompt as Administrator
-
-
- **Stop Elasticsearch**
-   - Press `Ctrl + C` in the Command Prompt window
-   - Or close the Command Prompt window
 
 
 ## **API Endpoints**
@@ -436,25 +408,7 @@ curl http://localhost:5000/api/logs/errors?page=2&pageSize=20
   - Invalid parameters
   - Malformed queries
 
-#### Error Logging Strategy
-- **Error Log Schema**:
-  - Timestamp
-  - Error type
-  - Raw input
-  - Stack trace
-  - Context information
 
-
-
-## **Security Considerations**
-- Input sanitization
-- Error message sanitization
-
-
-### Software Requirements
-- Node.js 16+
-- MongoDB 4.4+
-- Elasticsearch 8.16+
 ----
 
 ## **Future Improvements**
