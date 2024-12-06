@@ -1,5 +1,5 @@
 const express = require('express');
-const { getErrorLogs } = require('../controllers/errorLogs'); // Import the error logs controller
+const { getErrorLogs } = require('../controllers/errorLogsController'); // Import the error logs controller
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-const ErrorLog = require('../models/errorLog'); // Import the ErrorLog model
+const ErrorLog = require('../models/errorLogModel'); // Import the ErrorLog model
 
 // Controller to get error logs with pagination
 const getErrorLogs = async (req, res) => {

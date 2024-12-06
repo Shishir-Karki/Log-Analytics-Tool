@@ -1,5 +1,5 @@
-const Log = require('../models/log'); // MongoDB log model
-const ErrorLog = require('../models/errorLog');
+const Log = require('../models/logModel'); // MongoDB log model
+const ErrorLog = require('../models/errorLogModel');
 
 const elasticClient = require('../config/elasticsearch'); // Elasticsearch client
 const { parseLogEntry } = require('../utils/parser'); // Log entry parser utility

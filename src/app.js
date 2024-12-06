@@ -2,8 +2,8 @@ const express = require('express'); // Express for creating the server
 const bodyParser = require('body-parser'); // Middleware for parsing request bodies
 const dotenv = require('dotenv'); // Load environment variables
 const connectDB = require('./config/database'); // MongoDB connection
-const logRoutes = require('./routes/logs'); // Log routes
-const errorLogRoutes = require('./routes/errorLogs'); // Error log routes
+const logRoutes = require('./routes/logsRoutes'); // Log routes
+const errorLogRoutes = require('./routes/errorLogsRoutes'); // Error log routes
 
 
 dotenv.config(); // Load .env variables
